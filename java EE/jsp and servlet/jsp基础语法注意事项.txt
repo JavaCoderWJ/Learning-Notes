@@ -1,0 +1,37 @@
+	Tomcat是一个支持java web最小的web容器，由Apache提供
+	Tomcat本身提供的是一个Web容器，所有的JAvaWeb程序都要通过容器才能执行
+	一个JSP文件最终都是以*.class文件的形式执行的
+	
+	page指令的常用属性（常用）（只有import才能重复出现多次）
+	contentType                          定义JSP字符的编码和MIME类型，如果是中文HTML显示，则使用如下形式：contentType="text/html;charset=GBK"
+	import                               此JSP页面要导入那几个操作包，如 import="java.util.*"	
+	isErrorPage                          可以设置为true或false，表示此页面是否为出错的处理页。如果为true，则errorPage指定的页面出错是才能跳转
+	                                     到此页面进行错误处理；如果设置为false，则无法处理
+	language                             此页面使用的脚本语言，如 language="java"
+	pageEncoding                         JSP页面的字符编码，默认值为pageEncoding="iso-8859-1"，如果是中文则可以设置为 pageEncoding="GBK"
+	session                              可以设置为true或false，表示此页面是否参与HTTP会话。默认值为true，如果session="true"
+	 
+	 contentType 和 pageEncoding设置编码有什么区别
+	 pageEncoding指的是JSP本身的编码，而contentType中的chaeset指定的是服务器发送给客户端的内容编码。
+	 在JSP中，如果pageEncoding 存在，那么JSP的编码将由pageEncoding决定，否则将由contentType决定；如果两者都不存在，则将使用ISO-8859-1的编码方式。
+	 在JSP中，所有内容都要经过两次的编码操作，第一阶段会使用pageEncoding编码，第二阶段会使用utf-8编码，第三阶段就是Tomcat生成的网页，此时使用的才是contentType。
+	 
+	 包含
+	 包含分为静态包含和动态包含
+	 静态包含（<%@ include file=""%>）的操作属于先包含后处理，而动态包含(jsp:include page="")如果被包含页是动态页面，则属于先处理后包含。显然动态
+	 包含优于静态包含。其原因在于如果包含页和被包含页含有相同的变量值，那么静态包含后会出错。而且使用动态包含还可以向被包含的页面传递参数。
+	 eg.
+	 <jsp:include page="">
+	    <jsp:param name="" value="">
+	 </jsp:include>
+	 
+	 提示：
+	 动态页和静态页要分开，因为静态请求和动态请求的处理流程不一样，静态请求不需要经过容器，而动态请求需要经过容器，所以把没有java代码写成静态页面的后缀可以提高运行速度。
+	 
+	 页面跳转
+	 服务器端跳转
+	 <%@ page errorPage=""%>
+	 <jsp:forward page=""></jsp:forward>
+	 客户端跳转
+	 response.sendRedirect("");
+	 response.setHeader("refresh","time;url=...");

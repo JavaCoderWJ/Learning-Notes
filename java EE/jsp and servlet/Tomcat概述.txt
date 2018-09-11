@@ -1,0 +1,43 @@
+Tomcat概述
+  Tomcat除了能够充当运行Servlet的容器外，还提供了座位Web服务器的一些实用功能。如Tomcat管理
+  和控制平台、安全域管理和Tomcat阀等。Tomcat已经成为目前开发企业JavaWeb应用的最佳Servlet容器之一。
+ 
+Tomcat作为Servlet容器的基本功能
+  Servlet是一种运行在服务器上的小插件。Servlet最常见的用途是扩展Web服务器的功能，它可作为非常安
+  全的、可移植的、易于使用的CGI替代品。
+  
+  Servlet具有以下特点：
+  .
+  提供了可被服务器动态加载并执行的程序代码，为来自客户的请求提供相应的服务
+  Servlet完全用java语言编写，因此要求运行Servlet的服务器必须支持Java语言
+  Servlet完全在服务器端运行，因此它的运行不依赖于浏览器。不管浏览器是否支持Java语言，都能请求访问服务器端的Servlet
+
+Tomcat的组成结构
+  Tomcat本身由一系列可配置的组件构成，其中核心组件是Servlet容器组件，它是所有其他Tomcat组件的顶层容器。
+  用XML文件来显示：
+  <Server>
+    <Service>
+	  <Connector />
+	  <Engine>
+	    <Host>
+		  <Context>
+		  </Context>
+		</Host>
+      </Engine>
+	</Service>
+  </Server>
+  以上XML代码中，每种元素都代表一种Tomcat组件。这些元素可以分为以下4类
+    顶层类元素：包括<Server>和<Service>元素，它们位于整个配置文件的顶层。
+	连接器类元素：为<Connector>元素，代表介于客户与服务器之间的通信接口，负者将客户的请求发送给服务器并将服务器的响应结果返回给用户。
+	容器类元素：代表处理客户请求并生成响应结果的组件，有4种容器类元素，分别为<Engine>、<Host>、<Context>和<Cluster>元素。Engine组件为特定的Service组件处理所
+	            以客户请求，Host组件为特定虚拟主机处理客户请求，Context组件为特定的Web应用处理所有客户请求
+	嵌套类元素：代表可以嵌入到容器中的组件，如<Value>元素和<Realm>元素等。
+	            
+Tomcat的工作模式
+  Tomcat作为Servlet容器，有以下3种模式。
+ （1）独立的Servlet容器
+       Tomcat在一个Java虚拟机进程中独立运行，这是主要采用的工作模式。Tomcat可看做是能运行Servlet的独立web服务器。
+ （2）其他Web服务器进程内的Servlet容器
+       Tomcat运行在其他Web服务器的进程中，Tomcat不直接和客户端通信，仅仅为其他Web服务器处理客户端访问Servlet的请求。
+ （3）其他Web服务器进程外的Servlet容器
+       尽管Tomcat在一个Java虚拟机进程中独立运行，但是它不直接和客户端通信，仅仅为与它集成的其他Web服务器处理客户端访问Servlet的请求

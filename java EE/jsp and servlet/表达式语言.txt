@@ -1,0 +1,29 @@
+表达式语言简介
+  表达式语言(Expression Language，EL)是JSP2.0中新增的功能。使用表达式语言，可以方便的访问标志
+  位（在JSP中一共提供了page(pageContext)、request、session和application4中标志位） 中的属性内容，这样
+  就可以避免出现许多的Scriptlet代码，访问简便语法如下：
+  ${}
+  
+  表达式语言最大的特点是如果输出的内容为null，则自动使用空字符串""表示。
+  表达式内置对象                                     说明
+  pageContext                                        表示javax.servlet.jsp.PageContext对象
+  pageScope                                          表示从page属性范围查找输出属性
+  requestScope                                       表示从request属性范围查找输出属性
+  sessionScope                                       表示session属性范围查找输出属性
+  application                                        表示从application属性范围查找输出属性
+  param                                              接受传递到本页的参数
+  paramValues                                        接受传递到本页的一组参数
+  header                                             取得一个头信息数据
+  headerValues                                       取得一组头信息数据
+  cookie                                             取得Cookie中的数据
+  initParam                                          取得配置的初始化参数
+  
+  调用内置对象操作
+  
+  在表达式语言中，可以通过pageContext这个表达式的内置对象调用JSP内置对象中提供的方法
+  提示：调用方法是通过反射机制完成的，表达式语言中更多的是利用了反射的操作机制，再通过表达式的内置对象调用方法时，都是以调用getXxx（）或isXxx（）形式的方法居多
+  
+  请求参数：${param.xx}
+  请求一组参数：${paramValues.xxx[]}
+  集合操作：list   ${xxx.[]}
+            map    ${xxx.yyy}   ||    ${xxx.["yyy"]}

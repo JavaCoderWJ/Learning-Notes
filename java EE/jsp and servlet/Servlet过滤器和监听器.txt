@@ -1,0 +1,93 @@
+过滤器
+  在Servlet中，如果要实现一个过滤器，则直接让一个类实现javax.servlet.Filter接口即可。
+  javax.servlet.Filter接口定义的方法
+  方法                                                                                   描述
+  public void init(FilterConfig filterConfig) throws ServletException {}                 过滤器初始化（容器启动时初始化）时调用，可以通过FiterConfig取得初始化参数
+  public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)      完成具体的过滤操作，然后通过FilterChain让请求继续向下传递
+			throws IOException, ServletException
+  public void destory()                                                                  过滤器销毁时使用
+
+ 
+监听器
+
+  
+  对application监听
+
+  对application监听，实际上就是对ServletContext（Servlet上下文）进行监听，主要使用ServletContextListener 和 ServletContextAttributeListener两个接口
+
+  ServletContextListener接口定义的方法
+  方法                                                   							     描述
+  public void contextInitialized(ServletContextEvent sce)                                容器启动时触发
+  public void contextDestroyed(ServletContextEvent sce)                                  容器销毁时触发
+
+  ServletContextEvent事件定义的方法
+
+  方法                                                                                   描述
+  public ServletContext getServletContext()                                              取得ServletContext对象
+
+  上下文属性监听：ServletContextAttributeListener接口
+  
+
+  对Session监听
+
+  在在监听器中，针对session的监听操作主要使用HTTPSessionListener、HttpSessionAttribute和HttpSessionBindingListener接口  
+
+  1.session状态监听：HttpSessionListener接口
+  当需要对创建或销毁session的操作进行监听时，可以实现javax.servlet.http.HttpSessionListener接口
+
+  HttpSessionListener接口
+  方法                                                                                    描述
+  public void sessionCreated(HttpSessionEvent se)                                         session创建时调用
+  public void sessionDestroyed(HttpSessionEvent se)                                       session销毁时调用
+
+  HttpSessionEvent事件定义的方法
+  public HttpSession getSession()                                                         取得当前的session
+
+  session属性监听：HttpSessionAttributeListener接口和HttpSessionBindingListener接口
+  区别：前者需要配置 后者不需要配置
+  
+  HttpSessionBindingListener接口
+  方法                                                                                     描述
+  public void valueBound(HttpSessionBindingEvent event)                                    绑定对象到session时触发
+  public void valueUnbound(HttpSessionBindingEvent event)                                  从session中移除对象时触发
+ 
+ public class HttpSessionBindingListenerDemo implements HttpSessionBindingListener {
+	private String name;
+	public HttpSessionBindingListenerDemo(String name) {
+		// TODO Auto-generated constructor stub
+		this.setName(name);
+	}
+	@Override
+	public void valueBound(HttpSessionBindingEvent event) {
+		// TODO Auto-generated method stub
+		System.out.println("在session中保存HttpSessionBindingListener对象( name = "
+				+this.getName()+"),"+event.getSession().getId());
+	}
+	@Override
+	public void valueUnbound(HttpSessionBindingEvent event) {
+		// TODO Auto-generated method stub
+		System.out.println("在session中删除HttpSessionBindingListener对象( name = "
+				+this.getName()+"),"+event.getSession().getId());
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	
+}
+
+  
+  对request监听
+  
+  请求状态监听：ServletRequestListener接口
+   方法                                                                                      描述
+   public void requestInitialized(ServletRequestEvent sre)					    			 请求开示调用
+  public void requestDestroyed(ServletRequestEvent sre)                                      请求结束调用
+    ServletRequestEvent 事件定义的方法
+   publice ServletRequest getServletRequest（）                                              取得ServltRequest对象
+   public ServletContext getServletContext()                                                 取得ServletContext对象
+   
+   Request属性监听：ServletRequestAttribute接口
+   

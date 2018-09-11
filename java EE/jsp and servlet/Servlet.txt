@@ -1,0 +1,50 @@
+Servlet简介
+  Servlet（服务器端小程序）是使用Java语言编写的服务器程序。Servlet程序是Java对CGI程序的实现，但是与传统CGI的多线程处理
+  操作不同的是，Servlet采用了多线程的处理方式，这样就使得Servlet程序的运行效率比传统的CGI更高；而且Servlet还保留有Java
+  的可移植性的特点，这样使得Servlet更易使用，功能也是更加强大。
+
+Servlet生命周期
+  方法                                                              描述
+  public void init()throws ServletException                         Servlet初始化时调用
+  public void init(ServletConfig config)throws ServletException     Servlet初始化时调用，可以通过ServletConfig读取配置信息
+  public abstract service(HttpServletRequest req,                   Servlet服务，一般不会直接
+  HttpServletResponse resp)throws ServletException,IOException      覆写此方法，而是使用doGet()或doPost()方法
+  public void destory()                                             Servlet销毁时调用
+  
+  加载Servlet
+  通过web.xml指定的位置通过反射加载实例化
+  
+  卸载
+  当一个Servlet调用完destory()方法后，此实例将等待被垃圾收集器所回收，如果需要再次使用此Servlet时，会重新调用init()方法初始化
+  在正常情况下，Servlet只会初始化一次，而处理服务会调用多次，销毁也只会调用一次。但是如果一个Servlet长时间不调用的话，也会被容器自动销毁
+  ，而如果需要再次使用时会重新进行初始化操作，即在特殊情况下初始化可能会进行多次，销毁也可能进行多次。
+  
+  配置启动选项。Tomcat自动加载自动加载
+  <servlet>
+    <servlet-name>life</servlet-name>
+    <servlet-class>Servlet_demo.LifeCycleServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  
+  重定向和跳转的区别
+  
+  重定向和转发有一个重要的不同：当使用转发时，JSP容器将使用一个内部的方法来调用目标页面，新的页面继续处理同一个请求，而浏览器将不会知
+  道这个过程。 与之相反，重定向方式的含义是第一个页面通知浏览器发送一个新的页面请求。因为，当你使用重定向时，浏览器中所显示的URL会变成新
+  页面的URL, 而当使用转发时，该URL会保持不变。重定向的速度比转发慢，因为浏览器还得发出一个新的请求。同时，由于重定向方式产生了一个新的请
+  求，所以经过一次重定向后，request内的对象将无法使用。 
+  转发和重定向的区别 
+  不要仅仅为了把变量传到下一个页面而使用session作用域，那会无故增大变量的作用域，转发也许可以帮助你解决这个问题。
+  重定向：以前的request中存放的变量全部失效，并进入一个新的request作用域。
+  转发：以前的request中存放的变量不会失效，就像把两个页面拼到了一起。  
+
+  客户端跳转
+  resp.sendRedirect("****");
+  服务器跳转
+  Servlet中没有像JSP中的<jsp:forward>指令，所以如果想要执行服务器跳转就必须依靠RequestDispatcher接口完成，此接口提供两种方法
+  方法                                                                    描述
+  public void forward(ServletRequest request ,ServletResponse response)   页面跳转
+  throws ServletException,IOException
+  public void include(ServletRequest request ,ServletResponse response)   页面包含
+  throws ServletException,IOException
+  实例化RequestDispatcher接口
+  public RequestDispatcher get RequestDispatcher(String path)              取得RequestDispatcher实例

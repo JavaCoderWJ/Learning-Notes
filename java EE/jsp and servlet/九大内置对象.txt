@@ -1,0 +1,157 @@
+JSP内置对象概览
+  pageContext                JSP页面容器
+  request                    得到用户请求信息
+  response                   服务器向客户端的回应信息
+  session                    用来保存每一个用户的信息
+  application                表示所有用户的共享信息
+  config                     服务器配置，可以取得初始化信息
+  out                        页面输出
+  page                       表示从页面中取出的一个servlet实例
+  exception                  JSP页面异常
+  
+4中属性范围
+  page属性：只在一个页面中保存属性，跳转之后无效
+            page取得属性的返回是Object，所以必须进行向下转型
+  request属性：只在一次请求中保存属性，服务器跳转后依然有效（服务器跳转）
+  session属性：在一次会话范围中保存，无论何种跳转都可以使用，但是新开浏览器无法使用
+  application：在整个服务器上保存，所有用户都可以使用
+  
+各类对象补充
+  page
+    pageContext.setAttribute(String name,Object value,int scope) 可以对设置的属性进行范围转换（
+	                                                                                            int PAGE_SCOPE
+																								int REQUSET_SCOPE
+																								int SESSION_SCOPE
+																								int APPLICATION_SCOPE)但是一般还是只用page设置page属性
+  request:
+  request是javax.servlet.http.HttpServletRequest接口的实例对象，HttpServletRequest是ServletRequest接口的子接口
+  request->HttpServletRequest->ServletRequest，而ServletRequest只有HTTPServletRequest一个子接口之所以不把两个接口变成一个接口是因为
+  为了以后扩展应用。现在Java Web只支持HTTP协议开发，但以后可能会出现新的协议。
+ 
+ 
+ request方法示例                                                                  描述
+ public String getParameter(String name)                                          接受客户端发来的请求参数内容
+  public String[] getParameterValues(String name)                                 取得客户端发来的一组请求参数内容
+  public Enumeration getParameterName()                                           取得全部请求参数的名称 
+  void setCharactorEncoding(String env)                                           设置统一编码 
+
+  URL地址重写       动态页面地址？参数名称1=参数内容&参数名称=参数内容&....
+
+  表单提交的get和post有什么区别？
+  一般来说post更多。两者的区别在于在使用get提交时，提交的内容会在地址栏上显示：http://localhost:8080/Web基础/request_demo02.jsp?name=wt&inst=%E5%94%B1%E6%AD%8C
+  ；而使用post提交，提交的内容是不会显示在地址栏上的。get提交就相当于地址栏重写，所以在使用使用上也需要注意提交的数据大小问题，get提交只能提交小部分数据，一般大
+  小是4~5KB的数据；而post因为不会显示可以提交更多内容，如果表单中有一些大文本或者一些图片数据，则只能使用post的方式提交。
+  
+  在使用getParameterName()方法时为什么复选框这种数组要在名字是加两个"*","**inst"？
+  getParameterName()方法返回的是枚举字符串，可以根据hasMoreElement()判断是否有更多元素和nextElement()取出内容。但是它无法从字面上判断是不是数组，所以默认（可以改)以"**"进行区分
+  
+  
+  response对象
+  response对象的主要作用是对客户端的请求进行回应，将Web服务器处理后的结果发回给客户端。response对象属于javax.servlet.http.HttpServletResponse接口的实例
+  ->public interface HttpServletRequest extends ServletResponse
+  response对象常用方法
+  方法                                                            描述
+  public void addCookie(Cookie cookie)                            向客户端增加Cookie
+  public void setHeader(String name,String value)                 设置回应的头信息
+  public void sendRedirect(String location) throws IOEception     页面跳转(客户端)
+  setHeader(String name,String value)主要功能有刷新页面和跳转或其他的
+  eg> <%response.setHeader("refresh", "2"); %>
+      <%response.setHeader("refresh", "2;url=Hello.html"); %>此跳转属于客户器端跳转
+   
+  服务器端跳转和客户端跳转的区别
+    当代码运行到服务器端跳转代码时会立即执行跳转操作，而客户端跳转是会在这个页面的代码执行完过后再进行跳转
+	
+    简单理解所谓服务器端跳转就是指地址栏内容不变（客户端浏览器的地址栏不会显示目标地址的URL），//注：客户端请求到达以后，服务器发现当前资源给不出回应，要在服
+	务器内部请求另一个资源的跳转。所以，1.跳转与否客户端不知道（URL不变），2.属于一次request
+
+    而客户端跳转是指地址栏内容发生改变（客户端向服务器发请求偶，然后服务器再给客户端一个响应，然后客户端再根据服务器端给的响应中的URL再向服务器发送请求，所以是
+	两次请求，因此地址栏改变了显示最后一次请求地址）；//注：客户端请求到达服务端，服务端返回一个 “去访问其他链接” 的回应，客户端依此回应，第二次去访问。所以：1.客
+	户端根据回应地址又跳转了一次，2.第二次跳转后，已经出了request的属性范围
+	
+	注意在操作数据库的时候一定要在服务器端跳转之前关闭数据库连接，不然有可能会出现“数据库连接已经达到最大的异常”，只能重启服务器
+	
+    操作Cookie
+	Cookie定义的常用方法
+	方法                                                           描述
+	public Cookie(String name,String value)         （构造）       实例化Cookie对象，同时设置名称的内容
+    public String getName()	                                       取得Cookie的名称
+	public String getValue()                                       取得Cookie的内容
+	public void setMaxAge(int expiry)                              设置Cookie的保存时间，以秒为单位
+	设置Cookie
+	方法                                                           描述
+	public void addCookie(Cookie cookie)                           向客户端设置Cookie
+	取得Cookie
+	方法                                                           描述
+	public Cookie[] getCookies()                                   取得客户端设置的全部Cookie
+	在取得Cookie中得到的多的一行标识JSESSIONID-->DBC940AD721E44FF01F2E8C0313C33B2是系统自行设置的用来表示用户的唯一身份
+	而且Cookie必须调用setMaxAge()方法过后才会保存在客户端即使关闭浏览器再打开也依旧存在
+	一般一个客户端最多保存300个Cookie
+	
+	
+session对象
+    session对象是javax.servlet.http.HttpSession接口的实例化对象,所以session只能应用在Http协议中。
+	HttpSession接口的常用方法
+	方法                                                           描述
+	public String getId()                                          取得Session Id
+	public long getCreationTime()                                  取得Session的创建时间
+	public long getLastAccessedTime()                              取得session的最后一次操作时间
+	public boolean isNew()                                         判断是否是新的session（新用户）
+	public void invalidate()                                       让session失效
+	public Enumeration getAttributeNames()                         得到全部的属性
+	session id可以通过反序列化的方式保存，在服务器重新启动后继续使用，配置server.xml，加入session保存操作	 
+	
+	
+application对象
+    application对象是javax.servlet.ServletContext接口的实例化对象，从单词上翻译表示的是整个Servlet的上下文,ServletContext代表了整个容器的操作。
+	ServletContext接口的常用方法
+	方法                                                           描述
+	String getRealPath(String path)                                得到虚拟目录对应的绝对路径
+	public Enumeration getAttributeNames()                         得到所有属性的名称
+	public String getContextPath()                                 得到当前的虚拟路径名称
+	通过getAttributeNames()方法可以取得全部属性名称及内容，所以如果想Tomcat中增加了新的jar包，则肯定要重新启动服务器，这是由于服务器重新启动时
+	会将所需要的jar包的classpath配置到application属性范围。
+	
+
+
+Web安全性及config对象
+    
+	Web安全性
+	Tomcat在启动浏览器的时候无法显示根目录的WEB-INF文件夹，所以WEB-INF文件夹的安全性是最高的。
+	在Java EE的标准中，Web目录中的WEB-INF是必须存在的，而且此文件夹的安全性是最高的，在各个程序的开发中，基本都将一些配置信息(*.xml *.class等)保存在此目录。WEB-INF一定要大写。
+	因为网页无法访问到WEB-INF,所以不能把需要访问的内容放入此目录，除非在web.xml中配置映射(servlet配置)
+	当web.xml文件修改后，Tomcat必须重新启动才可以进行新配置的加载，否则将无法取得最新配置
+	
+	config对象
+	config对象是javax.servlet.ServletConfig接口的实例化对象，主要的功能是取得一些初始化的配置信息。
+	ServletConfig 接口的常用方法
+	方法                                                            描述
+	public String getInitParameter(String name)                     取得指定名称的初始化参数内容
+	public Enumeration getInitParameterNames()                      取得全部的初始化参数名称
+	注意：必须通过映射路径才能取得初始化参数
+	由于所有的初始化参数是在<servlet>节点中配置的，所以程序运行时必须通过映射路径访问才可以取得初始化参数
+	
+	
+out对象
+    out对象是javax.servlet.jsp.JspWriter类的实例化对象，主要功能就是完成页面的输出操作，使用println()或print()方法输出信息，但是从实际的开发来看，直接使用out对象的几率较小，一
+	般使用的表达式完成输出的操作。除此之外，out对象还定义了如表6-14所示的几个操作
+	out对象的其他操作
+	方法                                                             描述
+	public int getBufferSize()                                       返回JSP中缓冲区的大小
+	public int getRemaining()                                         返回JSP中未使用的缓冲区大小
+	
+	
+pageContext对象
+    pageContext对象是javax.servlet.jsp.PageContext类的实例，主要表示一个JSP页面的上下文，在此类中除了之前讲解过的属性操作外，还定以了如表6-15所示的一些方法。
+	方法                                                             描述
+	public abstract void forward(String relative
+	UrlPath)throws ServletException,IOEception                       页面跳转
+	public void include(String relative
+	UrlPath)throws ServletException,IOEception                       页面包含
+    public ServletConfig getServletConfig()                          取得ServletConfig对象
+    public ServletContext getServletContext()	                     取得ServletContext对象
+	public ServletRequest getRequest()                               取得getRequest()对象
+	public ServletResponse getResponse()                             取得getResponse()对象
+	public HttpSession getSession()                                  取得HttpSession对象（session对象是javax.servlet.http.HttpSession接口的实例化对象,所以session只能应用在Http协议中。）
+	
+	注意：取得操作实际上是request和response对象所在接口的父接口实例
+    pageContext对象中的getRequest()和getResponse() 两个方法返回的是ServletRequest和ServletResquest，而常用的request和response分别是HttpServletRequest和HttpServletResponse接口的实例。

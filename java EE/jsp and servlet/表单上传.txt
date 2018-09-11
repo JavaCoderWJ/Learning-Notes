@@ -1,0 +1,155 @@
+1.SmartUpload和FileUpload是最常用的两个组件开发包，SmartUpload使用较为方便。
+  
+  SmartUpload固定模板
+  SmartUpload smart = new SmartUpload();  //实例化上传组件
+  smart.initialize(pageContext);          //初始化上传操作
+  smart.upload();                         //上传准备
+  smart.save("upload");                   //将上传文件保存在upload文件夹中
+  注意由于表单进行了二进制封装，所以单纯靠request对象是无法取得提交参数的
+  要靠SmartUpload类中的getRequest().getParameter()方法才能取得请求参数
+  String name = smart.getRequest().getParameter();
+  
+  FileUpload取得模板
+  DiskFileItemFactory factory = new DiskFileItemFactory();     //创建磁盘工厂
+  ServletFileUpload upload = new ServletFileUpload(factory);   //创建处理工具
+  upload.setFileSizeMax(3145728);                        //设置最大上传大小 3MB 3*1024*1024
+  List<FileItem> items = upload.parseRequest(request);   //接收全部内容
+  Iterator<FileItem> iter = items.iterator();          //变为iterator实例
+  while(iter.hasNext()){ ...
+  
+  2.文件上传的二进制封装
+  <form action="fileupload_demo03.jsp" method="post" enctype="multipart/form-data">
+  
+  
+  
+  FileUpload补充
+  public FileUploadTools(HttpServletRequest request, int maxSize ,String tempDir)throws Exception     实例化FileUpload类，并接受request对象、最大上传文件限制、上传临时保存路径
+  public void init()                                                                                  初始化参数，区分普通参数或上传文件
+  public String getParameter(String name)                                                              根据参数名称取得参数内容
+  public String[] getParameterValues(String name)                                                     根据参数名称取得一组参数内容
+  public Map<String , FileItem> getUploadFiles()                                                     取得全部上传文件
+  public List<String> saveAll(String saveDir)throws IOException                                       自动保存全部的上传文件，并将已上传文件的名称返回给调用出
+  源代码：
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import IPTimeStamp.IPTimeStamp;
+
+public class FileUploadTools {
+
+	private HttpServletRequest request = null;
+	private List<FileItem>items = null;
+	private Map<String , List<String>>params = new HashMap<String , List<String>>();
+	private Map<String , FileItem> files = new HashMap<String ,FileItem>();
+	private int maxSize = 3*1024*1024;
+	public FileUploadTools(HttpServletRequest request, int maxSize ,String tempDir)throws Exception{
+		this.request = request;
+		DiskFileItemFactory factory = new DiskFileItemFactory();
+		if(tempDir!=null){
+			factory.setRepository(new File(tempDir));
+		}
+		ServletFileUpload upload = new ServletFileUpload(factory);
+		if(maxSize>0){
+			this.maxSize = maxSize;
+		}
+		upload.setFileSizeMax(this.maxSize);
+		try{
+			this.items = upload.parseRequest(request);
+		}catch(FileUploadException e){throw e;}
+		this.init();
+	}
+	
+	public void init(){
+		Iterator<FileItem> iter = this.items.iterator();
+		IPTimeStamp its = new IPTimeStamp();
+		while(iter.hasNext()){
+			FileItem item =iter.next();
+			if(item.isFormField()){
+				String name = item.getFieldName();
+				String value = item.getString();
+				List<String> temp = null;
+				if(this.params.containsKey(name)){
+					temp = this.params.get(name);
+				}else{
+					temp = new ArrayList<String>();
+				}
+				temp.add(value);
+				this.params.put(name, temp);
+			}else{
+				String temp[] = item.getFieldName().split("\\.");
+				String fileName = its.getTimeStamp()+"."+temp[temp.length-1];
+				this.files.put(fileName, item);
+			}
+		}
+	}
+	
+	public String getParameter(String name){
+		String ret = null;
+		List<String>temp = this.params.get(name);
+		if(temp!=null){
+			ret = temp.get(0);
+		}
+		return ret;
+	}
+	public String[] getParameterValues(String name){
+		String ret[] =null;
+		List<String> temp = this.params.get(name);
+		if(temp!=null){
+			ret = temp.toArray(new String[]{});
+		}
+		return ret;
+	}
+	public Map<String , FileItem> getUploadFiles(){
+		return this.files;
+	}
+	
+	public List<String> saveAll(String saveDir)throws IOException{
+		List<String> names = new ArrayList<String>();
+		if(this.files.size()>0){
+			Set<String> keys = this.files.keySet();
+			Iterator<String> iter = keys.iterator();
+			File saveFile = null;
+			InputStream input = null;
+			OutputStream outputStream = null;
+			while(iter.hasNext()){
+				FileItem item = this.files.get(iter.next());
+				String[] Ntemp = item.getName().split("\\.");
+				String fileName = new IPTimeStamp().getTimeStamp()+"."+Ntemp[Ntemp.length-1];
+				saveFile = new File(saveDir+fileName);
+				if(Ntemp[Ntemp.length-1].equals("jpg")||Ntemp[Ntemp.length-1].equals("png")){
+					names.add(fileName);
+					try{
+						input = item.getInputStream();
+						outputStream = new FileOutputStream(saveFile);
+						int temp = 0;
+						byte data[] = new byte[512];
+						while((temp=input.read(data))!=-1){
+							outputStream.write(data);
+						}
+					}catch(IOException e){throw e;}
+					finally{
+						input.close();
+						outputStream.close();
+					}
+				}
+			}
+		}
+		return names==null?null:names;
+	}
+}
