@@ -1,7 +1,7 @@
 # Learning-Notes
-个人学习笔记整理
+个人学习笔记整理（非全，积累更新）
 
-# JAVA基础（非全，积累更新）
+# JAVA基础
 # JAVA新版本特性
 # MYSQL
 # Redis
