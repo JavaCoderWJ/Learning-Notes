@@ -1,21 +1,2 @@
-# Learning-Notes
-个人学习笔记整理（非全，积累更新）
-
-# JAVA基础
-# JVM
-# 数据结构与算法
-# JAVA新版本特性
-# MYSQL
-# Redis
-# SSM
-# Spring boot
-# netty
-# dubbo
-# kafka
-# 工具
-
-..........
-
-# 近期安排
-完善github笔记，整理技术
-深入操作系统与计算机网络
+# 个人学习笔记：
+https://www.jianshu.com/u/ba11c6afd0f0
